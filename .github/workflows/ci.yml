@@ -40,24 +40,20 @@ jobs:
       - name: Run Unit Tests (only if build succeeded)
         if: steps.build.outcome == 'success'
         run: dotnet test --no-build
-        
-        
-    
+
       - name: Smart Context Intelligence
-        shell: bash
         if: github.event_name == 'pull_request'
-        
+        shell: bash
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_HEAD: ${{ github.event.pull_request.head.ref }}
+          PR_BASE: ${{ github.event.pull_request.base.ref }}
         run: |
           echo "PR-nummer: $PR_NUMBER"
           echo "Författare: $PR_AUTHOR"
           echo "Källa: $PR_HEAD"
           echo "Mål: $PR_BASE"
-          env:
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
-          PR_HEAD: ${{ github.event.pull_request.head.ref }}
-          PR_BASE: ${{ github.event.pull_request.base.ref }}
-           
         
           
           
