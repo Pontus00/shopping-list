@@ -43,32 +43,20 @@ jobs:
         
         
     
-
-      - name: Smart Context Intelligence
+      - name: Smart Context Intelligence (PR)
         shell: bash
-      
+        if: github.event_name == 'pull_request'
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_HEAD: ${{ github.event.pull_request.head.ref }}
+          PR_BASE: ${{ github.event.pull_request.base.ref }}
         run: |
-          echo "### Kontextinformation"
-          if [[ "${EVENT_NAME}" == "pull_request" ]]; then
-            echo "PR-nummer: ${PR_NUMBER}"
-            echo "Författare: ${PR_AUTHOR}"
-            echo "Källa: ${PR_HEAD}"
-            echo "Mål: ${PR_BASE}"
-          elif [[ "${EVENT_NAME}" == "push" ]]; then
-            echo "Commit-meddelande: ${COMMIT_MESSAGE}"
-            echo "Författare: ${COMMIT_AUTHOR}"
-            echo "Branch: ${BRANCH}"
-            if [[ -n "${ADDED}" || -n "${MODIFIED}" || -n "${REMOVED}" ]]; then
-              echo "Filändringar:"
-              echo "  Lagt till: ${ADDED}"
-              echo "  Ändrat: ${MODIFIED}"
-              echo "  Tagit bort: ${REMOVED}"
-            fi
-          elif [[ "${EVENT_NAME}" == "workflow_dispatch" ]]; then
-            echo "Startare: ${ACTOR}"
-            echo "Custom input: ${CUSTOM_INPUT}"
-          fi
-      
+          echo "PR-nummer: $PR_NUMBER"
+          echo "Författare: $PR_AUTHOR"
+          echo "Källa: $PR_HEAD"
+          echo "Mål: $PR_BASE"
+           
         
           
           
