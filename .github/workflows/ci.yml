@@ -106,6 +106,7 @@ jobs:
             echo "- **Inputs:**"
             echo "  - customInput: '${{ github.event.inputs.customInput }}'"
           } >> $GITHUB_STEP_SUMMARY
+          shell: bash
         
           
           
