@@ -42,29 +42,30 @@ jobs:
         run: dotnet test --no-build
         
         
+    
       - name: Smart Context Intelligence
-        run: |
-         echo "### Kontextinformation"
-         if [[ "${{ github.event_name }}" == 'pull_request' ]]; then
-         echo "PR-nummer: ${{ github.event.number }}"
-         echo "Författare: ${{ github.event.pull_request.user.login }}"
-         echo "Källa: ${{ github.event.pull_request.head.ref }}"
-         echo "Mål: ${{ github.event.pull_request.base.ref }}"
-         elif [[ "${{ github.event_name }}" == 'push' ]]; then
-         echo "Commit-meddelande: ${{ github.event.commits[0].message }}"
-         echo "Författare: ${{ github.event.commits[0].author.name }}"
-         echo "Branch: ${{ github.ref }}"
-         if [[ -n "${{ github.event.commits[0].added }}" || -n "${{ github.event.commits[0].modified }}" || -n "${{ github.event.commits[0].removed }}" ]]; then
-         echo "Filändringar:"
-          echo "  Lagt till: ${{ toJson(github.event.commits[0].added) }}"
-          echo "  Ändrat: ${{ toJson(github.event.commits[0].modified) }}"
-          echo "  Tagit bort: ${{ toJson(github.event.commits[0].removed) }}"
-         fi
-         elif [[ "${{ github.event_name }}" == 'workflow_dispatch' ]]; then
-         echo "Startare: ${{ github.actor }}"
-         echo "Custom input: ${{ github.event.inputs.customInput }}"
-         fi
         shell: bash
+        run: |
+          echo "### Kontextinformation"
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "PR-nummer: ${{ github.event.number }}"
+            echo "Författare: ${{ github.event.pull_request.user.login }}"
+            echo "Källa: ${{ github.event.pull_request.head.ref }}"
+            echo "Mål: ${{ github.event.pull_request.base.ref }}"
+          elif [[ "${{ github.event_name }}" == "push" ]]; then
+            echo "Commit-meddelande: ${{ github.event.commits[0].message }}"
+            echo "Författare: ${{ github.event.commits[0].author.name }}"
+            echo "Branch: ${{ github.ref }}"
+            if [[ -n "${{ github.event.commits[0].added }}" || -n "${{ github.event.commits[0].modified }}" || -n "${{ github.event.commits[0].removed }}" ]]; then
+              echo "Filändringar:"
+              echo "  Lagt till: ${{ toJson(github.event.commits[0].added) }}"
+              echo "  Ändrat: ${{ toJson(github.event.commits[0].modified) }}"
+              echo "  Tagit bort: ${{ toJson(github.event.commits[0].removed) }}"
+            fi
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "Startare: ${{ github.actor }}"
+            echo "Custom input: ${{ github.event.inputs.customInput }}"
+          fi
 
       
         
