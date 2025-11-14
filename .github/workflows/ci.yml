@@ -48,20 +48,7 @@ jobs:
     steps:
       - name: Smart Context Intelligence
         shell: bash
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-          PR_NUMBER: ${{ github.event.number }}
-          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
-          PR_HEAD: ${{ github.event.pull_request.head.ref }}
-          PR_BASE: ${{ github.event.pull_request.base.ref }}
-          COMMIT_MESSAGE: ${{ github.event.commits[0].message }}
-          COMMIT_AUTHOR: ${{ github.event.commits[0].author.name }}
-          BRANCH: ${{ github.ref }}
-          ADDED: ${{ toJson(github.event.commits[0].added) }}
-          MODIFIED: ${{ toJson(github.event.commits[0].modified) }}
-          REMOVED: ${{ toJson(github.event.commits[0].removed) }}
-          ACTOR: ${{ github.actor }}
-          CUSTOM_INPUT: ${{ github.event.inputs.customInput }}
+      
         run: |
           echo "### Kontextinformation"
           if [[ "${EVENT_NAME}" == "pull_request" ]]; then
