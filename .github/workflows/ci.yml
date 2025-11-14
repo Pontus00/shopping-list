@@ -31,7 +31,7 @@ jobs:
           dotnet-version: ${{ matrix.dotnet }}
 
       - name: Build
-        id: build ShoppingList.sln
+        id: build
         run: dotnet build restore
 
       - name: Run Unit Tests (only if build succeeded)
