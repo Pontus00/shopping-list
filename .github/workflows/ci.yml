@@ -41,6 +41,7 @@ jobs:
         if: steps.build.outcome == 'success'
         run: dotnet test --no-build
 
+      
       - name: Smart Context Intelligence
         if: github.event_name == 'pull_request'
         shell: bash
@@ -49,11 +50,22 @@ jobs:
           PR_AUTHOR: ${{ github.event.pull_request.user.login }}
           PR_HEAD: ${{ github.event.pull_request.head.ref }}
           PR_BASE: ${{ github.event.pull_request.base.ref }}
+          SUMMARY_FILE: $GITHUB_STEP_SUMMARY
         run: |
-          echo "PR-nummer: $PR_NUMBER"
-          echo "Författare: $PR_AUTHOR"
-          echo "Källa: $PR_HEAD"
-          echo "Mål: $PR_BASE"
+          echo "=== Smart Context Intelligence ==="
+          echo "PR Number: $PR_NUMBER"
+          echo "Author: $PR_AUTHOR"
+          echo "Head Branch: $PR_HEAD"
+          echo "Base Branch: $PR_BASE"
+          echo
+          # Optionally write to Step Summary for visibility in Actions UI
+          {
+            echo "## Smart Context Intelligence"
+            echo "- **PR Number**: $PR_NUMBER"
+            echo "- **Author**: $PR_AUTHOR"
+            echo "- **Head Branch**: \`$PR_HEAD\`"
+            echo "- **Base Branch**: \`$PR_BASE\`"
+          } >> "$SUMMARY_FILE"
         
           
           
