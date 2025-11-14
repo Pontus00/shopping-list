@@ -4,7 +4,6 @@ on:
   workflow_dispatch:
     inputs:
       customInput:
-        description: 'Custom input for manual runs'
         required: false
         type: string
   push:
@@ -39,59 +38,33 @@ jobs:
         if: steps.build.outcome == 'success'
         run: dotnet test --no-build
 
-      - name: Context Info
-        run: |
-          if [[ "${{ github.event_name }}" == 'pull_request' ]]; then
-            echo "🔔 **PR Context**"
-            echo "PR Number: ${{ github.event.pull_request.number }}"
-            echo "Author:    ${{ github.event.pull_request.user.login }}"
-            echo "Source:    ${{ github.event.pull_request.head.ref }}"
-            echo "Target:    ${{ github.event.pull_request.base.ref }}"
-          elif [[ "${{ github.event_name }}" == 'push' ]]; then
-            echo "📦 **Push Context**"
-            echo "Commit:    ${{ github.event.head_commit.message }}"
-            echo "Author:    ${{ github.event.head_commit.author.name }}"
-            echo "Files:"
-            for file in ${{ join(github.event.commits.*.added, ',') }}; do
-              echo "  - $file"
-            done
-            for file in ${{ join(github.event.commits.*.modified, ',') }}; do
-              echo "  - $file"
-            done
-          elif [[ "${{ github.event_name }}" == 'workflow_dispatch' ]]; then
-            echo "🖐️ **Manual Run Context**"
-            echo "Started by: ${{ github.actor }}"
-            echo "Custom Input: ${{ inputs.customInput }}"
-          else
-            echo "Unknown context: ${{ github.event_name }}"
-          fi
+     jobs:
+  example:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Smart Context Intelligence
         shell: bash
-        # On Windows, we fallback to PowerShell
-        if: ${{ runner.os == 'Windows' }}
         run: |
-          if ($env:GITHUB_EVENT_NAME -eq 'pull_request') {
-            Write-Host "🔔 **PR Context**"
-            Write-Host "PR Number: $env:GITHUB_EVENT_PULL_REQUEST_NUMBER"
-            Write-Host "Author:    $env:GITHUB_EVENT_PULL_REQUEST_USER_LOGIN"
-            Write-Host "Source:    $env:GITHUB_EVENT_PULL_REQUEST_HEAD_REF"
-            Write-Host "Target:    $env:GITHUB_EVENT_PULL_REQUEST_BASE_REF"
-          } elseif ($env:GITHUB_EVENT_NAME -eq 'push') {
-            Write-Host "📦 **Push Context**"
-            Write-Host "Commit:    $env:GITHUB_EVENT_HEAD_COMMIT_MESSAGE"
-            Write-Host "Author:    $env:GITHUB_EVENT_HEAD_COMMIT_AUTHOR_NAME"
-            Write-Host "Files:"
-            foreach ($file in $env:GITHUB_EVENT_COMMITS_ADDED) { Write-Host "  - $file" }
-            foreach ($file in $env:GITHUB_EVENT_COMMITS_MODIFIED) { Write-Host "  - $file" }
-          } elseif ($env:GITHUB_EVENT_NAME -eq 'workflow_dispatch') {
-            Write-Host "🖐️ **Manual Run Context**"
-            Write-Host "Started by: $env:GITHUB_ACTOR"
-            Write-Host "Custom Input: $env:INPUTS_CUSTOMINPUT"
-          } else {
-            Write-Host "Unknown context: $env:GITHUB_EVENT_NAME"
-          }
-        shell: pwsh
-        if: ${{ runner.os == 'Windows' }}
-        
+          echo "### Kontextinformation"
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "PR-nummer: ${{ github.event.number }}"
+            echo "Författare: ${{ github.event.pull_request.user.login }}"
+            echo "Källa: ${{ github.event.pull_request.head.ref }}"
+            echo "Mål: ${{ github.event.pull_request.base.ref }}"
+          elif [[ "${{ github.event_name }}" == "push" ]]; then
+            echo "Commit-meddelande: ${{ github.event.commits[0].message }}"
+            echo "Författare: ${{ github.event.commits[0].author.name }}"
+            echo "Branch: ${{ github.ref }}"
+            if [[ -n "${{ github.event.commits[0].added }}" || -n "${{ github.event.commits[0].modified }}" || -n "${{ github.event.commits[0].removed }}" ]]; then
+              echo "Filändringar:"
+              echo "  Lagt till: ${{ toJson(github.event.commits[0].added) }}"
+              echo "  Ändrat: ${{ toJson(github.event.commits[0].modified) }}"
+              echo "  Tagit bort: ${{ toJson(github.event.commits[0].removed) }}"
+            fi
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "Startare: ${{ github.actor }}"
+            echo "Custom input: ${{ github.event.inputs.customInput }}"
+          fi
           
           
           
