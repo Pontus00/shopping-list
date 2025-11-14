@@ -37,11 +37,8 @@ jobs:
       - name: Run Unit Tests (only if build succeeded)
         if: steps.build.outcome == 'success'
         run: dotnet test --no-build
-
-     jobs:
-  example:
-    runs-on: ubuntu-latest
-    steps:
+  
+    
       - name: Smart Context Intelligence
         shell: bash
         run: |
