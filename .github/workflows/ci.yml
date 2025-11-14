@@ -43,30 +43,46 @@ jobs:
         
         
     
+  jobs:
+    runs-on: ubuntu-latest
+    steps:
       - name: Smart Context Intelligence
         shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_NUMBER: ${{ github.event.number }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_HEAD: ${{ github.event.pull_request.head.ref }}
+          PR_BASE: ${{ github.event.pull_request.base.ref }}
+          COMMIT_MESSAGE: ${{ github.event.commits[0].message }}
+          COMMIT_AUTHOR: ${{ github.event.commits[0].author.name }}
+          BRANCH: ${{ github.ref }}
+          ADDED: ${{ toJson(github.event.commits[0].added) }}
+          MODIFIED: ${{ toJson(github.event.commits[0].modified) }}
+          REMOVED: ${{ toJson(github.event.commits[0].removed) }}
+          ACTOR: ${{ github.actor }}
+          CUSTOM_INPUT: ${{ github.event.inputs.customInput }}
         run: |
           echo "### Kontextinformation"
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            echo "PR-nummer: ${{ github.event.number }}"
-            echo "Författare: ${{ github.event.pull_request.user.login }}"
-            echo "Källa: ${{ github.event.pull_request.head.ref }}"
-            echo "Mål: ${{ github.event.pull_request.base.ref }}"
-          elif [[ "${{ github.event_name }}" == "push" ]]; then
-            echo "Commit-meddelande: ${{ github.event.commits[0].message }}"
-            echo "Författare: ${{ github.event.commits[0].author.name }}"
-            echo "Branch: ${{ github.ref }}"
-            if [[ -n "${{ github.event.commits[0].added }}" || -n "${{ github.event.commits[0].modified }}" || -n "${{ github.event.commits[0].removed }}" ]]; then
+          if [[ "${EVENT_NAME}" == "pull_request" ]]; then
+            echo "PR-nummer: ${PR_NUMBER}"
+            echo "Författare: ${PR_AUTHOR}"
+            echo "Källa: ${PR_HEAD}"
+            echo "Mål: ${PR_BASE}"
+          elif [[ "${EVENT_NAME}" == "push" ]]; then
+            echo "Commit-meddelande: ${COMMIT_MESSAGE}"
+            echo "Författare: ${COMMIT_AUTHOR}"
+            echo "Branch: ${BRANCH}"
+            if [[ -n "${ADDED}" || -n "${MODIFIED}" || -n "${REMOVED}" ]]; then
               echo "Filändringar:"
-              echo "  Lagt till: ${{ toJson(github.event.commits[0].added) }}"
-              echo "  Ändrat: ${{ toJson(github.event.commits[0].modified) }}"
-              echo "  Tagit bort: ${{ toJson(github.event.commits[0].removed) }}"
+              echo "  Lagt till: ${ADDED}"
+              echo "  Ändrat: ${MODIFIED}"
+              echo "  Tagit bort: ${REMOVED}"
             fi
-          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "Startare: ${{ github.actor }}"
-            echo "Custom input: ${{ github.event.inputs.customInput }}"
+          elif [[ "${EVENT_NAME}" == "workflow_dispatch" ]]; then
+            echo "Startare: ${ACTOR}"
+            echo "Custom input: ${CUSTOM_INPUT}"
           fi
-
       
         
           
