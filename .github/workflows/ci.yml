@@ -1,0 +1,52 @@
+name: CI/CD yml Workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      customInput:
+        required: false
+        type: string
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-test:
+    name: Build & Test (.NET ${{ matrix.dotnet }} on ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        dotnet: [8.0.x, 9.0.x]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ matrix.dotnet }}
+
+      - name: Build
+        id: build
+        run: dotnet build --no-restore
+
+      - name: Run Unit Tests (only if build succeeded)
+        if: steps.build.outcome == 'success'
+        run: dotnet test --no-build
+
+      - name: Context Info
+        
+          
+          
+          
+          
+
+
+
+
+
+
