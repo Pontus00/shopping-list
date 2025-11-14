@@ -41,31 +41,71 @@ jobs:
         if: steps.build.outcome == 'success'
         run: dotnet test --no-build
 
-      
-      - name: Smart Context Intelligence
+      # Context intelligence for Pull Requests
+      - name: Context Intelligence (PR)
         if: github.event_name == 'pull_request'
-        shell: bash
-        env:
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
-          PR_HEAD: ${{ github.event.pull_request.head.ref }}
-          PR_BASE: ${{ github.event.pull_request.base.ref }}
-          SUMMARY_FILE: $GITHUB_STEP_SUMMARY
         run: |
-          echo "=== Smart Context Intelligence ==="
-          echo "PR Number: $PR_NUMBER"
-          echo "Author: $PR_AUTHOR"
-          echo "Head Branch: $PR_HEAD"
-          echo "Base Branch: $PR_BASE"
-          echo
-          # Optionally write to Step Summary for visibility in Actions UI
+          echo "### Kontextinformation för Pull Request"
+          echo "- **PR-nummer:** ${{ github.event.pull_request.number }}"
+          echo "- **Author:** ${{ github.event.pull_request.user.login }}"
+          echo "- **Source Branch:** `${{ github.event.pull_request.head.ref }}`"
+          echo "- **Target Branch:** `${{ github.event.pull_request.base.ref }}`"
           {
-            echo "## Smart Context Intelligence"
-            echo "- **PR Number**: $PR_NUMBER"
-            echo "- **Author**: $PR_AUTHOR"
-            echo "- **Head Branch**: \`$PR_HEAD\`"
-            echo "- **Base Branch**: \`$PR_BASE\`"
-          } >> "$SUMMARY_FILE"
+            echo "### Kontextinformation för Pull Request"
+            echo "- **PR-nummer:** ${{ github.event.pull_request.number }}"
+            echo "- **Author:** ${{ github.event.pull_request.user.login }}"
+            echo "- **Source Branch:** `${{ github.event.pull_request.head.ref }}`"
+            echo "- **Target Branch:** `${{ github.event.pull_request.base.ref }}`"
+          } >> $GITHUB_STEP_SUMMARY
+
+      # Context intelligence for Push
+      - name: Context Intelligence (Push)
+        if: github.event_name == 'push'
+        run: |
+          echo "### Kontextinformation för Push"
+          echo "- **Commit message:** ${{ github.event.head_commit.message }}"
+          echo "- **Author:** ${{ github.event.head_commit.author.name }} (${{ github.event.head_commit.author.username }})"
+          echo "- **Changed files:**"
+          if [ -n "${{ github.event.head_commit.added }}" ]; then
+            echo "  + Added: ${{ join(github.event.head_commit.added, ', ') }}"
+          fi
+          if [ -n "${{ github.event.head_commit.modified }}" ]; then
+            echo "  + Modified: ${{ join(github.event.head_commit.modified, ', ') }}"
+          fi
+          if [ -n "${{ github.event.head_commit.removed }}" ]; then
+            echo "  + Removed: ${{ join(github.event.head_commit.removed, ', ') }}"
+          fi
+
+          {
+            echo "### Kontextinformation för Push"
+            echo "- **Commit message:** ${{ github.event.head_commit.message }}"
+            echo "- **Author:** ${{ github.event.head_commit.author.name }} (${{ github.event.head_commit.author.username }})"
+            echo "- **Changed files:**"
+            if [ -n "${{ github.event.head_commit.added }}" ]; then
+              echo "  + Added: ${{ join(github.event.head_commit.added, ', ') }}"
+            fi
+            if [ -n "${{ github.event.head_commit.modified }}" ]; then
+              echo "  + Modified: ${{ join(github.event.head_commit.modified, ', ') }}"
+            fi
+            if [ -n "${{ github.event.head_commit.removed }}" ]; then
+              echo "  + Removed: ${{ join(github.event.head_commit.removed, ', ') }}"
+            fi
+          } >> $GITHUB_STEP_SUMMARY
+
+      # Context intelligence for Manual/dispatch
+      - name: Context Intelligence (Manuell)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "### Kontextinformation för Manuell körning"
+          echo "- **Startad av:** ${{ github.actor }}"
+          echo "- **Inputs:**"
+          echo "  - customInput: '${{ github.event.inputs.customInput }}'"
+          {
+            echo "### Kontextinformation för Manuell körning"
+            echo "- **Startad av:** ${{ github.actor }}"
+            echo "- **Inputs:**"
+            echo "  - customInput: '${{ github.event.inputs.customInput }}'"
+          } >> $GITHUB_STEP_SUMMARY
         
           
           
