@@ -30,6 +30,9 @@ jobs:
         with:
           dotnet-version: ${{ matrix.dotnet }}
 
+      - name: Restore NuGet packages
+        run: dotnet restore
+
       - name: Build
         id: build
         run: dotnet build --no-restore
