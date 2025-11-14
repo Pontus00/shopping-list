@@ -1,9 +1,10 @@
-name: CI/CD yml Workflow
+name: CI/CD Workflow
 
 on:
   workflow_dispatch:
     inputs:
       customInput:
+        description: 'Custom input for manual runs'
         required: false
         type: string
   push:
@@ -30,9 +31,6 @@ jobs:
         with:
           dotnet-version: ${{ matrix.dotnet }}
 
-      - name: Restore NuGet packages
-        run: dotnet restore
-
       - name: Build
         id: build
         run: dotnet build --no-restore
@@ -41,72 +39,58 @@ jobs:
         if: steps.build.outcome == 'success'
         run: dotnet test --no-build
 
-      # Context intelligence for Pull Requests
-      - name: Context Intelligence (PR)
-        if: github.event_name == 'pull_request'
+      - name: Context Info
         run: |
-          echo "### Kontextinformation för Pull Request"
-          echo "- **PR-nummer:** ${{ github.event.pull_request.number }}"
-          echo "- **Author:** ${{ github.event.pull_request.user.login }}"
-          echo "- **Source Branch:** `${{ github.event.pull_request.head.ref }}`"
-          echo "- **Target Branch:** `${{ github.event.pull_request.base.ref }}`"
-          {
-            echo "### Kontextinformation för Pull Request"
-            echo "- **PR-nummer:** ${{ github.event.pull_request.number }}"
-            echo "- **Author:** ${{ github.event.pull_request.user.login }}"
-            echo "- **Source Branch:** `${{ github.event.pull_request.head.ref }}`"
-            echo "- **Target Branch:** `${{ github.event.pull_request.base.ref }}`"
-          } >> $GITHUB_STEP_SUMMARY
-
-      # Context intelligence for Push
-      - name: Context Intelligence (Push)
-        if: github.event_name == 'push'
+          if [[ "${{ github.event_name }}" == 'pull_request' ]]; then
+            echo "🔔 **PR Context**"
+            echo "PR Number: ${{ github.event.pull_request.number }}"
+            echo "Author:    ${{ github.event.pull_request.user.login }}"
+            echo "Source:    ${{ github.event.pull_request.head.ref }}"
+            echo "Target:    ${{ github.event.pull_request.base.ref }}"
+          elif [[ "${{ github.event_name }}" == 'push' ]]; then
+            echo "📦 **Push Context**"
+            echo "Commit:    ${{ github.event.head_commit.message }}"
+            echo "Author:    ${{ github.event.head_commit.author.name }}"
+            echo "Files:"
+            for file in ${{ join(github.event.commits.*.added, ',') }}; do
+              echo "  - $file"
+            done
+            for file in ${{ join(github.event.commits.*.modified, ',') }}; do
+              echo "  - $file"
+            done
+          elif [[ "${{ github.event_name }}" == 'workflow_dispatch' ]]; then
+            echo "🖐️ **Manual Run Context**"
+            echo "Started by: ${{ github.actor }}"
+            echo "Custom Input: ${{ inputs.customInput }}"
+          else
+            echo "Unknown context: ${{ github.event_name }}"
+          fi
+        shell: bash
+        # On Windows, we fallback to PowerShell
+        if: ${{ runner.os == 'Windows' }}
         run: |
-          echo "### Kontextinformation för Push"
-          echo "- **Commit message:** ${{ github.event.head_commit.message }}"
-          echo "- **Author:** ${{ github.event.head_commit.author.name }} (${{ github.event.head_commit.author.username }})"
-          echo "- **Changed files:**"
-          if [ -n "${{ github.event.head_commit.added }}" ]; then
-            echo "  + Added: ${{ join(github.event.head_commit.added, ', ') }}"
-          fi
-          if [ -n "${{ github.event.head_commit.modified }}" ]; then
-            echo "  + Modified: ${{ join(github.event.head_commit.modified, ', ') }}"
-          fi
-          if [ -n "${{ github.event.head_commit.removed }}" ]; then
-            echo "  + Removed: ${{ join(github.event.head_commit.removed, ', ') }}"
-          fi
-
-          {
-            echo "### Kontextinformation för Push"
-            echo "- **Commit message:** ${{ github.event.head_commit.message }}"
-            echo "- **Author:** ${{ github.event.head_commit.author.name }} (${{ github.event.head_commit.author.username }})"
-            echo "- **Changed files:**"
-            if [ -n "${{ github.event.head_commit.added }}" ]; then
-              echo "  + Added: ${{ join(github.event.head_commit.added, ', ') }}"
-            fi
-            if [ -n "${{ github.event.head_commit.modified }}" ]; then
-              echo "  + Modified: ${{ join(github.event.head_commit.modified, ', ') }}"
-            fi
-            if [ -n "${{ github.event.head_commit.removed }}" ]; then
-              echo "  + Removed: ${{ join(github.event.head_commit.removed, ', ') }}"
-            fi
-          } >> $GITHUB_STEP_SUMMARY
-
-      # Context intelligence for Manual/dispatch
-      - name: Context Intelligence (Manuell)
-        if: github.event_name == 'workflow_dispatch'
-        run: |
-          echo "### Kontextinformation för Manuell körning"
-          echo "- **Startad av:** ${{ github.actor }}"
-          echo "- **Inputs:**"
-          echo "  - customInput: '${{ github.event.inputs.customInput }}'"
-          {
-            echo "### Kontextinformation för Manuell körning"
-            echo "- **Startad av:** ${{ github.actor }}"
-            echo "- **Inputs:**"
-            echo "  - customInput: '${{ github.event.inputs.customInput }}'"
-          } >> $GITHUB_STEP_SUMMARY
-          
+          if ($env:GITHUB_EVENT_NAME -eq 'pull_request') {
+            Write-Host "🔔 **PR Context**"
+            Write-Host "PR Number: $env:GITHUB_EVENT_PULL_REQUEST_NUMBER"
+            Write-Host "Author:    $env:GITHUB_EVENT_PULL_REQUEST_USER_LOGIN"
+            Write-Host "Source:    $env:GITHUB_EVENT_PULL_REQUEST_HEAD_REF"
+            Write-Host "Target:    $env:GITHUB_EVENT_PULL_REQUEST_BASE_REF"
+          } elseif ($env:GITHUB_EVENT_NAME -eq 'push') {
+            Write-Host "📦 **Push Context**"
+            Write-Host "Commit:    $env:GITHUB_EVENT_HEAD_COMMIT_MESSAGE"
+            Write-Host "Author:    $env:GITHUB_EVENT_HEAD_COMMIT_AUTHOR_NAME"
+            Write-Host "Files:"
+            foreach ($file in $env:GITHUB_EVENT_COMMITS_ADDED) { Write-Host "  - $file" }
+            foreach ($file in $env:GITHUB_EVENT_COMMITS_MODIFIED) { Write-Host "  - $file" }
+          } elseif ($env:GITHUB_EVENT_NAME -eq 'workflow_dispatch') {
+            Write-Host "🖐️ **Manual Run Context**"
+            Write-Host "Started by: $env:GITHUB_ACTOR"
+            Write-Host "Custom Input: $env:INPUTS_CUSTOMINPUT"
+          } else {
+            Write-Host "Unknown context: $env:GITHUB_EVENT_NAME"
+          }
+        shell: pwsh
+        if: ${{ runner.os == 'Windows' }}
         
           
           
