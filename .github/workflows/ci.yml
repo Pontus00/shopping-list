@@ -43,9 +43,7 @@ jobs:
         
         
     
-  jobs:
-    runs-on: ubuntu-latest
-    steps:
+
       - name: Smart Context Intelligence
         shell: bash
       
