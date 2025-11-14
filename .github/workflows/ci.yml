@@ -43,6 +43,7 @@ jobs:
 
       # Context intelligence for Pull Requests
       - name: Context Intelligence (PR)
+        shell: bash
         if: github.event_name == 'pull_request'
         run: |
           echo "### Kontextinformation för Pull Request"
@@ -78,6 +79,7 @@ jobs:
 
           {
             echo "### Kontextinformation för Push"
+            shell: bash
             echo "- **Commit message:** ${{ github.event.head_commit.message }}"
             echo "- **Author:** ${{ github.event.head_commit.author.name }} (${{ github.event.head_commit.author.username }})"
             echo "- **Changed files:**"
@@ -94,6 +96,7 @@ jobs:
 
       # Context intelligence for Manual/dispatch
       - name: Context Intelligence (Manuell)
+        shell: bash
         if: github.event_name == 'workflow_dispatch'
         run: |
           echo "### Kontextinformation för Manuell körning"
@@ -106,7 +109,7 @@ jobs:
             echo "- **Inputs:**"
             echo "  - customInput: '${{ github.event.inputs.customInput }}'"
           } >> $GITHUB_STEP_SUMMARY
-          shell: bash
+          
         
           
           
