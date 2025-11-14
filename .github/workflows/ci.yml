@@ -32,7 +32,7 @@ jobs:
 
       - name: Build
         id: build
-        run: dotnet build restore
+        run: dotnet build --no-restore
 
       - name: Run Unit Tests (only if build succeeded)
         if: steps.build.outcome == 'success'
